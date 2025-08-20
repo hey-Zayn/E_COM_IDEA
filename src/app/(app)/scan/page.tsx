@@ -11,14 +11,11 @@ import {
 } from '@/components/ui/card';
 import {
   CheckCircle,
-  Circle,
   ScanLine,
   Smartphone,
-  Zap,
   Camera,
   ArrowRight,
   Loader2,
-  Check,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -34,18 +31,18 @@ const captureSteps: {
 }[] = [
   {
     key: 'front',
-    title: 'Front View',
-    instruction: 'Stand facing the camera. Make sure your full body is visible. Press "Capture" when ready.',
+    title: 'Front View Scan',
+    instruction: 'Face the camera and align your body with the silhouette. Hold still.',
   },
   {
     key: 'side',
-    title: 'Side View',
-    instruction: 'Turn 90 degrees to your left or right. Press "Capture" to continue.',
+    title: 'Side View Scan',
+    instruction: 'Turn 90 degrees to your left. Align with the silhouette and hold still.',
   },
   {
     key: 'back',
-    title: 'Back View',
-    instruction: 'Now turn so your back is facing the camera. Press "Capture" to finalize.',
+    title: 'Back View Scan',
+    instruction: 'Face away from the camera. Align your back with the silhouette.',
   },
 ];
 
@@ -107,19 +104,32 @@ export default function ScanPage() {
   };
 
   const handleCapture = () => {
+    // Here you would capture the image data
+    // For now, we just move to the next step
     if (currentStep === 'front') {
       setCurrentStep('side');
     } else if (currentStep === 'side') {
       setCurrentStep('back');
     } else if (currentStep === 'back') {
       setCurrentStep('processing');
-      // Simulate processing time
+      // Simulate processing and saving new measurements
       setTimeout(() => {
+        const newMeasurements = [
+            { name: 'Height', value: "6' 0\"" },
+            { name: 'Weight', value: '180 lbs' },
+            { name: 'Chest', value: '43 in' },
+            { name: 'Waist', value: '35 in' },
+            { name: 'Inseam', value: '33 in' },
+            { name: 'Sleeve', value: '36 in' },
+        ];
+        localStorage.setItem('userMeasurements', JSON.stringify(newMeasurements));
+        localStorage.setItem('lastScanDate', new Date().toLocaleDateString());
+
         setCurrentStep('complete');
-        // Simulate redirect after completion
+        
         setTimeout(() => {
           router.push('/profile');
-        }, 3000);
+        }, 2000);
       }, 3000);
     }
   };
@@ -133,22 +143,23 @@ export default function ScanPage() {
       return (
         <Card className="w-full max-w-2xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Create Your 3D Avatar</CardTitle>
+            <CardTitle className="text-2xl">Biometric Body Scan</CardTitle>
             <CardDescription>
-              Follow these simple steps to get an accurate body model for
-              virtual try-ons.
+              Our advanced AI will create a precise 3D model of your body for perfect-fitting clothes.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 text-center">
             <div className="flex justify-center">
               <Smartphone className="h-24 w-24 text-primary" />
             </div>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Find a well-lit room and wear form-fitting clothing. Prop your
-              phone on a stable surface and stand 6-8 feet away.
-            </p>
+            <ul className="text-muted-foreground max-w-md mx-auto list-disc list-inside text-left">
+                <li>Find a well-lit, private space.</li>
+                <li>Wear minimal, form-fitting clothing.</li>
+                <li>Prop your phone on a stable surface.</li>
+                <li>Stand 6-8 feet away from the camera.</li>
+            </ul>
             <Button size="lg" className="w-full" onClick={handleStartScan}>
-              <ScanLine className="mr-2" /> Start Scan
+              <ScanLine className="mr-2" /> Start Biometric Scan
             </Button>
             {hasCameraPermission === false && (
                 <Alert variant="destructive" className="text-left">
@@ -171,10 +182,10 @@ export default function ScanPage() {
                 </CardHeader>
                 <CardContent>
                     <CardTitle className="text-2xl">
-                        {currentStep === 'processing' ? 'Processing Your Avatar' : 'Scan Complete!'}
+                        {currentStep === 'processing' ? 'Analyzing Biometric Data' : 'Scan Complete!'}
                     </CardTitle>
                     <CardDescription className="mt-2">
-                        {currentStep === 'processing' ? 'Our AI is creating your 3D model. This might take a moment.' : 'Your new measurements are saved. Redirecting you to your profile...'}
+                        {currentStep === 'processing' ? 'Our AI is building your 3D model. This may take a moment.' : 'Your new measurements have been saved. Redirecting to your profile...'}
                     </CardDescription>
                 </CardContent>
             </Card>
@@ -188,7 +199,7 @@ export default function ScanPage() {
           <CardDescription>{currentStepDetails?.instruction}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="relative aspect-video w-full bg-secondary rounded-md overflow-hidden border">
+          <div className="relative aspect-[9/16] sm:aspect-video w-full max-w-md mx-auto bg-secondary rounded-md overflow-hidden border">
             <video
               ref={videoRef}
               className="w-full h-full object-cover"
@@ -196,8 +207,19 @@ export default function ScanPage() {
               muted
               playsInline
             />
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                <svg viewBox="0 0 200 400" className="w-full h-full opacity-50 text-white" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M100 40C116.569 40 130 53.4315 130 70C130 86.5685 116.569 100 100 100C83.4315 100 70 86.5685 70 70C70 53.4315 83.4315 40 100 40Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M100 110V120" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M60 140H140" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M100 120C100 120 70 130 70 180V320H130V180C130 130 100 120 100 120Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M70 250H130" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M70 320V360H80" stroke="currentColor" stroke-width="2"/>
+                    <path d="M130 320V360H120" stroke="currentColor" stroke-width="2"/>
+                </svg>
+            </div>
             {hasCameraPermission === false && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white p-4">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white p-4">
                 <Camera className="h-12 w-12 mb-4" />
                 <p className="text-lg font-semibold">Camera Access Denied</p>
                 <p className="text-sm text-center">
@@ -213,8 +235,9 @@ export default function ScanPage() {
                 ))}
              </div>
 
-            <Button onClick={handleCapture} disabled={hasCameraPermission !== true}>
-              Capture <ArrowRight className="ml-2" />
+            <Button onClick={handleCapture} disabled={hasCameraPermission !== true} size="lg">
+              Capture
+              <ArrowRight className="ml-2" />
             </Button>
           </div>
         </CardContent>

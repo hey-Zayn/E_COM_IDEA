@@ -1,3 +1,6 @@
+// src/app/(app)/profile/page.tsx
+'use client';
+
 import { AppHeader } from '@/components/layout/app-header';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -17,16 +20,19 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FilePen } from 'lucide-react';
+import { FilePen, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const measurements = [
-  { name: 'Height', value: "5' 11\"" },
-  { name: 'Weight', value: '175 lbs' },
-  { name: 'Chest', value: '42 in' },
-  { name: 'Waist', value: '34 in' },
-  { name: 'Inseam', value: '32 in' },
-  { name: 'Sleeve', value: '35 in' },
-];
+type Measurement = { name: string; value: string };
+
+const defaultMeasurements: Measurement[] = [
+    { name: 'Height', value: "5' 11\"" },
+    { name: 'Weight', value: '175 lbs' },
+    { name: 'Chest', value: '42 in' },
+    { name: 'Waist', value: '34 in' },
+    { name: 'Inseam', value: '32 in' },
+    { name: 'Sleeve', value: '35 in' },
+  ];
 
 const scanHistory = [
   { date: '2023-10-15', accuracy: '99.8%', model: 'v3.2' },
@@ -35,6 +41,19 @@ const scanHistory = [
 ];
 
 export default function ProfilePage() {
+  const [measurements, setMeasurements] = useState<Measurement[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const storedMeasurements = localStorage.getItem('userMeasurements');
+    if (storedMeasurements) {
+      setMeasurements(JSON.parse(storedMeasurements));
+    } else {
+      setMeasurements(defaultMeasurements);
+    }
+    setLoading(false);
+  }, []);
+
   return (
     <div className="flex flex-col w-full">
       <AppHeader title="My Profile" />
@@ -72,17 +91,23 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {measurements.map((m) => (
-                    <div
-                      key={m.name}
-                      className="bg-secondary p-4 rounded-lg"
-                    >
-                      <p className="text-sm text-muted-foreground">{m.name}</p>
-                      <p className="text-xl font-semibold">{m.value}</p>
+                {loading ? (
+                    <div className="flex justify-center items-center h-24">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
-                  ))}
-                </div>
+                ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {measurements.map((m) => (
+                        <div
+                        key={m.name}
+                        className="bg-secondary p-4 rounded-lg"
+                        >
+                        <p className="text-sm text-muted-foreground">{m.name}</p>
+                        <p className="text-xl font-semibold">{m.value}</p>
+                        </div>
+                    ))}
+                    </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

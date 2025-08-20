@@ -1,3 +1,5 @@
+// src/app/(app)/dashboard/page.tsx
+'use client';
 import {
   Card,
   CardContent,
@@ -11,8 +13,23 @@ import { ArrowRight, Bot, Shirt, User } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AppHeader } from '@/components/layout/app-header';
+import { useEffect, useState } from 'react';
 
 export default function Dashboard() {
+  const [lastScan, setLastScan] = useState('2 weeks ago');
+
+  useEffect(() => {
+    const lastScanDate = localStorage.getItem('lastScanDate');
+    if (lastScanDate) {
+      // Basic date diff simulation
+      const scanDate = new Date(lastScanDate);
+      const today = new Date();
+      if (scanDate.toDateString() === today.toDateString()) {
+        setLastScan('Today');
+      }
+    }
+  }, []);
+
   return (
     <div className="flex flex-col w-full">
       <AppHeader title="Dashboard" />
@@ -48,7 +65,7 @@ export default function Dashboard() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Last Scan:</span>
-                  <span className="font-medium">2 weeks ago</span>
+                  <span className="font-medium">{lastScan}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Saved Outfits:</span>
